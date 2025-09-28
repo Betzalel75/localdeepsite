@@ -98,7 +98,7 @@ export const Preview = ({
         if (hoveredElement) {
           try {
             hoveredElement.classList.remove("hovered-element");
-          } catch (e) {
+          } catch {
             // Ignore classList errors
           }
         }

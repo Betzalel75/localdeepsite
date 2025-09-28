@@ -8,7 +8,7 @@ import { getPTag } from "@/lib/utils";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { namespace: string; repoId: string } }
+  { params }: { params: Promise<{ namespace: string; repoId: string }> },
 ) {
   const user = await isAuthenticated();
 
@@ -17,7 +17,7 @@ export async function GET(
   }
 
   await dbConnect();
-  const { namespace, repoId } = params;
+  const { namespace, repoId } = await params;
 
   const project = await Project.findOne({
     user_id: user.id,
@@ -29,7 +29,7 @@ export async function GET(
         ok: false,
         error: "Project not found",
       },
-      { status: 404 }
+      { status: 404 },
     );
   }
   const space_url = `https://huggingface.co/spaces/${namespace}/${repoId}/raw/main/index.html`;
@@ -46,7 +46,7 @@ export async function GET(
           ok: false,
           error: "Space is not a static space",
         },
-        { status: 404 }
+        { status: 404 },
       );
     }
     if (space.author !== user.name) {
@@ -55,7 +55,7 @@ export async function GET(
           ok: false,
           error: "Space does not belong to the authenticated user",
         },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -66,7 +66,7 @@ export async function GET(
           ok: false,
           error: "Failed to fetch space HTML",
         },
-        { status: 404 }
+        { status: 404 },
       );
     }
     let html = await response.text();
@@ -81,7 +81,7 @@ export async function GET(
         },
         ok: true,
       },
-      { status: 200 }
+      { status: 200 },
     );
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -93,19 +93,19 @@ export async function GET(
       });
       return NextResponse.json(
         { error: "Space not found", ok: false },
-        { status: 404 }
+        { status: 404 },
       );
     }
     return NextResponse.json(
       { error: error.message, ok: false },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { namespace: string; repoId: string } }
+  { params }: { params: Promise<{ namespace: string; repoId: string }> },
 ) {
   const user = await isAuthenticated();
 
@@ -114,7 +114,7 @@ export async function PUT(
   }
 
   await dbConnect();
-  const { namespace, repoId } = params;
+  const { namespace, repoId } = await params;
   const { html, prompts } = await req.json();
 
   const project = await Project.findOne({
@@ -127,7 +127,7 @@ export async function PUT(
         ok: false,
         error: "Project not found",
       },
-      { status: 404 }
+      { status: 404 },
     );
   }
 
@@ -154,14 +154,14 @@ export async function PUT(
           ...prompts,
         ],
       },
-    }
+    },
   );
   return NextResponse.json({ ok: true }, { status: 200 });
 }
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { namespace: string; repoId: string } }
+  { params }: { params: Promise<{ namespace: string; repoId: string }> },
 ) {
   const user = await isAuthenticated();
 
@@ -170,7 +170,7 @@ export async function POST(
   }
 
   await dbConnect();
-  const { namespace, repoId } = params;
+  const { namespace, repoId } = await params;
 
   const space = await spaceInfo({
     name: namespace + "/" + repoId,
@@ -184,7 +184,7 @@ export async function POST(
         ok: false,
         error: "Space is not a static space",
       },
-      { status: 404 }
+      { status: 404 },
     );
   }
   if (space.author !== user.name) {
@@ -193,7 +193,7 @@ export async function POST(
         ok: false,
         error: "Space does not belong to the authenticated user",
       },
-      { status: 403 }
+      { status: 403 },
     );
   }
 
@@ -209,7 +209,7 @@ export async function POST(
         error: "Project already exists",
         redirect: `/projects/${namespace}/${repoId}`,
       },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -229,6 +229,6 @@ export async function POST(
         prompts: newProject.prompts,
       },
     },
-    { status: 201 }
+    { status: 201 },
   );
 }

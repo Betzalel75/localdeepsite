@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useModelConfiguration } from "./useApiManager";
 
 interface OllamaModel {
   value: string;
@@ -13,47 +13,27 @@ interface UseOllamaModelsReturn {
   loading: boolean;
   error: string | null;
   isLocalMode: boolean;
+  refetch: () => Promise<void>;
 }
 
 export function useOllamaModels(): UseOllamaModelsReturn {
-  const [models, setModels] = useState<OllamaModel[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const isLocalMode = process.env.NEXT_PUBLIC_LOCAL_MODE === "true";
+  const { localModels, loading, error, refreshProviders } =
+    useModelConfiguration();
 
-  useEffect(() => {
-    if (!isLocalMode) {
-      return;
-    }
-
-    const fetchModels = async () => {
-      setLoading(true);
-      setError(null);
-      
-      try {
-        const response = await fetch("/api/ollama-models");
-        if (!response.ok) {
-          throw new Error("Failed to fetch Ollama models");
-        }
-        
-        const data = await response.json();
-        setModels(data.models || []);
-      } catch (err) {
-        console.error("Error fetching Ollama models:", err);
-        setError("Unable to fetch local models");
-        setModels([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchModels();
-  }, [isLocalMode]);
+  // Convert to expected format for backward compatibility
+  const models = localModels.map((model) => ({
+    value: model.id,
+    label: model.name,
+    providers: [model.provider],
+    autoProvider: model.provider,
+    isLocal: true,
+  }));
 
   return {
     models,
     loading,
-    error,
-    isLocalMode,
+    error: error ? `Failed to fetch models: ${error}` : null,
+    isLocalMode: true,
+    refetch: refreshProviders,
   };
 }

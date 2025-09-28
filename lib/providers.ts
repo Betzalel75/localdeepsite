@@ -1,3 +1,13 @@
+export interface ModelInterface {
+  value: string;
+  label: string;
+  providers: string[];
+  autoProvider: string;
+  isThinker?: boolean;
+  isNew?: boolean;
+  isLocal?: boolean;
+}
+
 export const PROVIDERS = {
   "fireworks-ai": {
     name: "Fireworks AI",
@@ -49,7 +59,7 @@ export const PROVIDERS = {
   },
 };
 
-export const MODELS = [
+export const MODELS: ModelInterface[] = [
   {
     value: "deepseek-ai/DeepSeek-V3-0324",
     label: "DeepSeek V3 O324",
@@ -87,7 +97,7 @@ export const MODELS = [
     label: "DeepSeek V3.1",
     providers: ["fireworks-ai", "novita"],
     isNew: true,
-    autoProvider: "novita"
+    autoProvider: "novita",
   },
   // Modèles locaux pour Ollama
   {

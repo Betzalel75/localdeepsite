@@ -10,7 +10,7 @@ echo "🧪 Test du mode local..."
 # Vérifier que les variables d'environnement sont configurées
 if [ ! -f .env.local ]; then
     echo "❌ Fichier .env.local manquant!"
-    echo "Copiez .env.local.example vers .env.local"
+    echo "Copiez env.local.example vers .env.local"
     exit 1
 fi
 

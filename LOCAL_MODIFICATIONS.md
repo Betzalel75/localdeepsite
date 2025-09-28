@@ -6,7 +6,7 @@ Ce fichier documente toutes les modifications apportées pour le mode local.
 
 ### Configuration
 - `.env.local` - Configuration du mode local
-- `.env.local.example` - Exemple de configuration
+- `env.local.example` - Exemple de configuration
 
 ### Routes API
 - `app/api/ask-ai-local/route.ts` - **NOUVEAU** - Route pour Ollama

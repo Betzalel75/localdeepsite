@@ -1,5 +1,6 @@
 import { History as HistoryIcon } from "lucide-react";
 import { HtmlHistory } from "@/types";
+import { memo } from "react";
 import {
   Popover,
   PopoverContent,
@@ -7,19 +8,21 @@ import {
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 
-export function History({
-  history,
-  setHtml,
-}: {
+interface HistoryProps {
   history: HtmlHistory[];
   setHtml: (html: string) => void;
-}) {
+}
+
+export const History = memo(function History({
+  history,
+  setHtml,
+}: HistoryProps) {
   return (
     <Popover>
       <PopoverTrigger asChild>
         <Button variant="ghost" size="sm" className="max-lg:hidden">
           <HistoryIcon className="size-4 text-neutral-300" />
-          {history?.length} edit{history.length !== 1 ? "s" : ""}
+          {history?.length || 0} edit{(history?.length || 0) !== 1 ? "s" : ""}
         </Button>
       </PopoverTrigger>
       <PopoverContent
@@ -33,7 +36,7 @@ export function History({
           <ul className="max-h-[250px] overflow-y-auto">
             {history?.map((item, index) => (
               <li
-                key={index}
+                key={`${item.createdAt}-${index}`} // Clé plus stable
                 className="text-gray-300 text-xs py-2 border-b border-gray-800 last:border-0 flex items-center justify-between gap-2"
               >
                 <div className="">
@@ -69,4 +72,4 @@ export function History({
       </PopoverContent>
     </Popover>
   );
-}
+});

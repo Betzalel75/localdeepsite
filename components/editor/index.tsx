@@ -7,7 +7,6 @@ import { CopyIcon } from "lucide-react";
 import {
   useCopyToClipboard,
   useEvent,
-  useLocalStorage,
   useMount,
   useUnmount,
   useUpdateEffect,

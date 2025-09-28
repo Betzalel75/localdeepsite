@@ -22,7 +22,12 @@ import { TooltipContent } from "@radix-ui/react-tooltip";
 import { SelectedHtmlElement } from "./selected-html-element";
 import { FollowUpTooltip } from "./follow-up-tooltip";
 import { isTheSameHtml } from "@/lib/compare-html-diff";
-import { getApiEndpoint, getDefaultProvider, getDefaultModel } from "@/lib/client-config";
+import {
+  getApiEndpoint,
+  getDefaultProvider,
+  getDefaultModel,
+} from "@/lib/client-config";
+import { useModelConfiguration } from "@/hooks/useApiManager";
 
 export function AskAI({
   html,
@@ -57,7 +62,10 @@ export function AskAI({
   const [prompt, setPrompt] = useState("");
   const [hasAsked, setHasAsked] = useState(false);
   const [previousPrompt, setPreviousPrompt] = useState("");
-  const [provider, setProvider] = useLocalStorage("provider", getDefaultProvider());
+  const [provider, setProvider] = useLocalStorage(
+    "provider",
+    getDefaultProvider(),
+  );
   const [model, setModel] = useLocalStorage("model", getDefaultModel());
   const [openProvider, setOpenProvider] = useState(false);
   const [providerError, setProviderError] = useState("");
@@ -68,9 +76,15 @@ export function AskAI({
   const [controller, setController] = useState<AbortController | null>(null);
   const [isFollowUp, setIsFollowUp] = useState(true);
 
+  // Use the new API manager
+  const { availableModels, canUseCloudModels } = useModelConfiguration();
+
   const selectedModel = useMemo(() => {
-    return MODELS.find((m: { value: string }) => m.value === model);
-  }, [model]);
+    return (
+      availableModels.find((m: any) => m.value === model) ||
+      MODELS.find((m: { value: string }) => m.value === model)
+    );
+  }, [model, availableModels]);
 
   const callAi = async (redesignMarkdown?: string) => {
     if (isAiWorking) return;
@@ -93,7 +107,20 @@ export function AskAI({
         const selectedElementHtml = selectedElement
           ? selectedElement.outerHTML
           : "";
-        const request = await fetch(getApiEndpoint("/api/ask-ai"), {
+
+        // Determine API endpoint based on provider type
+        const currentModel = availableModels.find(
+          (m: any) => m.value === model,
+        );
+        const isLocalProvider =
+          currentModel?.type === "local" || currentModel?.isLocal;
+        const apiEndpoint = isLocalProvider
+          ? "/api/ask-ai-local"
+          : canUseCloudModels
+            ? "/api/ask-ai-cloud"
+            : getApiEndpoint("/api/ask-ai");
+
+        const request = await fetch(apiEndpoint, {
           method: "PUT",
           body: JSON.stringify({
             prompt,
@@ -134,7 +161,19 @@ export function AskAI({
           if (audio.current) audio.current.play();
         }
       } else {
-        const request = await fetch(getApiEndpoint("/api/ask-ai"), {
+        // Determine API endpoint based on provider type
+        const currentModel = availableModels.find(
+          (m: any) => m.value === model,
+        );
+        const isLocalProvider =
+          currentModel?.type === "local" || currentModel?.isLocal;
+        const apiEndpoint = isLocalProvider
+          ? "/api/ask-ai-local"
+          : canUseCloudModels
+            ? "/api/ask-ai-cloud"
+            : getApiEndpoint("/api/ask-ai");
+
+        const request = await fetch(apiEndpoint, {
           method: "POST",
           body: JSON.stringify({
             prompt,
@@ -152,9 +191,9 @@ export function AskAI({
         if (request && request.body) {
           const reader = request.body.getReader();
           const decoder = new TextDecoder("utf-8");
-          const selectedModel = MODELS.find(
-            (m: { value: string }) => m.value === model
-          );
+          const selectedModel =
+            availableModels.find((m: any) => m.value === model) ||
+            MODELS.find((m: { value: string }) => m.value === model);
           let contentThink: string | undefined = undefined;
           const read = async () => {
             const { done, value } = await reader.read();
@@ -190,7 +229,7 @@ export function AskAI({
 
               // Now we have the complete HTML including </html>, so set it to be sure
               const finalDoc = contentResponse.match(
-                /<!DOCTYPE html>[\s\S]*<\/html>/
+                /<!DOCTYPE html>[\s\S]*<\/html>/,
               )?.[0];
               if (finalDoc) {
                 setHtml(finalDoc);
@@ -217,7 +256,7 @@ export function AskAI({
             contentResponse += chunk;
 
             const newHtml = contentResponse.match(
-              /<!DOCTYPE html>[\s\S]*/
+              /<!DOCTYPE html>[\s\S]*/,
             )?.[0];
             if (newHtml) {
               setIsThinking(false);
@@ -310,7 +349,7 @@ export function AskAI({
                   "size-4 text-neutral-400 group-hover:text-neutral-300 transition-all duration-200",
                   {
                     "rotate-180": openThink,
-                  }
+                  },
                 )}
               />
             </header>
@@ -322,7 +361,7 @@ export function AskAI({
                   "max-h-[0px]": !openThink,
                   "min-h-[250px] max-h-[250px] border-t border-neutral-700":
                     openThink,
-                }
+                },
               )}
             >
               <p className="text-[13px] text-neutral-400 whitespace-pre-line px-5 pb-4 pt-3">
@@ -365,14 +404,14 @@ export function AskAI({
               "w-full bg-transparent text-sm outline-none text-white placeholder:text-neutral-400 p-4",
               {
                 "!pt-2.5": selectedElement && !isAiWorking,
-              }
+              },
             )}
             placeholder={
               selectedElement
                 ? `Ask LocalSite about ${selectedElement.tagName.toLowerCase()}...`
                 : hasAsked
-                ? "Ask LocalSite for edits"
-                : "Ask LocalSite anything..."
+                  ? "Ask LocalSite for edits"
+                  : "Ask LocalSite anything..."
             }
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}

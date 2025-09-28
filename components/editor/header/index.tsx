@@ -4,6 +4,7 @@ import { Eye, MessageCircleCode } from "lucide-react";
 import Logo from "@/assets/logo.svg";
 
 import { Button } from "@/components/ui/button";
+import { ProviderStatus } from "@/components/provider-status";
 import classNames from "classnames";
 import Image from "next/image";
 
@@ -63,7 +64,10 @@ export function Header({
           </Button>
         ))}
       </div>
-      <div className="flex items-center justify-end gap-3">{children}</div>
+      <div className="flex items-center justify-end gap-3">
+        <ProviderStatus />
+        {children}
+      </div>
     </header>
   );
 }

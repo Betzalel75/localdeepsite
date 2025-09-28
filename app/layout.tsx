@@ -9,7 +9,7 @@ import { Toaster } from "@/components/ui/sonner";
 import MY_TOKEN_KEY from "@/lib/get-cookie-name";
 // Use fetch on the server to call internal API
 import AppContext from "@/components/contexts/app-context";
-
+import { OnboardingModal } from "@/components/onboarding";
 
 const inter = Inter({
   variable: "--font-inter-sans",
@@ -23,7 +23,9 @@ const ptSans = PT_Sans({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"),
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000",
+  ),
   title: "LocalSite | Build locally with AI ✨",
   description:
     "LocalSite is a 100% local web development tool powered by Ollama. Build websites with AI running directly on your machine, no cloud required.",
@@ -102,7 +104,10 @@ export default async function RootLayout({
       >
         <Toaster richColors position="bottom-center" />
         <TanstackProvider>
-          <AppContext me={data}>{children}</AppContext>
+          <AppContext me={data}>
+            {children}
+            <OnboardingModal />
+          </AppContext>
         </TanstackProvider>
       </body>
     </html>
