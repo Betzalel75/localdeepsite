@@ -219,7 +219,7 @@ export function ProviderStatus() {
           {localProviderStatuses.length > 0 && (
             <div className="p-3 border-b border-neutral-800/50">
               <h4 className="text-xs font-medium text-neutral-300 mb-2 flex items-center gap-2">
-                <Wifi className="h-3 w-3 text-blue-500" />
+                <WifiOff className="h-3 w-3 text-purple-500" />
                 Local Providers
               </h4>
               <div className="space-y-2">
@@ -262,7 +262,7 @@ export function ProviderStatus() {
           {cloudProviderStatuses.length > 0 && (
             <div className="p-3">
               <h4 className="text-xs font-medium text-neutral-300 mb-2 flex items-center gap-2">
-                <WifiOff className="h-3 w-3 text-purple-500" />
+                <Wifi className="h-3 w-3 text-blue-500" />
                 Cloud Providers
               </h4>
               <div className="space-y-2">

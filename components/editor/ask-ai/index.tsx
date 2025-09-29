@@ -9,7 +9,6 @@ import { FaStopCircle } from "react-icons/fa";
 
 import ProModal from "@/components/pro-modal";
 import { Button } from "@/components/ui/button";
-import { MODELS } from "@/lib/providers";
 import { HtmlHistory } from "@/types";
 import { InviteFriends } from "@/components/invite-friends";
 import { Settings } from "@/components/editor/ask-ai/settings";
@@ -22,13 +21,10 @@ import { TooltipContent } from "@radix-ui/react-tooltip";
 import { SelectedHtmlElement } from "./selected-html-element";
 import { FollowUpTooltip } from "./follow-up-tooltip";
 import { isTheSameHtml } from "@/lib/compare-html-diff";
-import {
-  getApiEndpoint,
-  getDefaultProvider,
-  getDefaultModel,
-} from "@/lib/client-config";
+import { getDefaultProvider, getDefaultModel } from "@/lib/client-config";
 import { useModelConfiguration } from "@/hooks/useApiManager";
 import { FOLLOW_UP_SYSTEM_PROMPT, INITIAL_SYSTEM_PROMPT } from "@/lib/prompts";
+import { getApiEndpointForModel } from "@/lib/api-manager";
 
 export function AskAI({
   html,
@@ -78,14 +74,15 @@ export function AskAI({
   const [isFollowUp, setIsFollowUp] = useState(true);
 
   // Use the new API manager
-  const { availableModels, canUseCloudModels } = useModelConfiguration();
+  const { availableModels, canUseCloudModels, cloudModels } =
+    useModelConfiguration();
 
   const selectedModel = useMemo(() => {
     return (
-      availableModels.find((m: any) => m.value === model) ||
-      MODELS.find((m: { value: string }) => m.value === model)
+      availableModels.find((m: any) => m.id === model) ||
+      cloudModels.find((m: any) => m.id === model)
     );
-  }, [model, availableModels]);
+  }, [availableModels, cloudModels, model]);
 
   const callAi = async (redesignMarkdown?: string) => {
     if (isAiWorking) return;
@@ -95,7 +92,6 @@ export function AskAI({
     setThink("");
     setOpenThink(false);
     setIsThinking(true);
-    console.log("call AI");
     let contentResponse = "";
     let thinkResponse = "";
     let lastRenderTime = 0;
@@ -111,25 +107,13 @@ export function AskAI({
           : "";
 
         // Determine API endpoint based on provider type
-        const currentModel = availableModels.find(
-          (m: any) => m.value === model,
+        const currentModel = availableModels.find((m: any) => m.id === model);
+
+        const apiEndpoint = getApiEndpointForModel(
+          selectedModel,
+          canUseCloudModels,
         );
 
-        const isLocalProvider =
-          currentModel?.type === "local" || currentModel?.isLocal;
-        const isLocalMode = process.env.NEXT_PUBLIC_LOCAL_MODE === "true";
-
-        const apiEndpoint =
-          isLocalProvider || isLocalMode
-            ? "/api/ask-ai-local"
-            : canUseCloudModels
-              ? "/api/ask-ai-cloud"
-              : getApiEndpoint("/api/ask-ai");
-        console.log(
-          "isLocalProvider: , apiEndpoint: ",
-          isLocalProvider,
-          apiEndpoint,
-        );
         const messages = [
           {
             role: "system",
@@ -200,24 +184,18 @@ export function AskAI({
         }
       } else {
         // Determine API endpoint based on provider type
-        const currentModel = availableModels.find(
-          (m: any) => m.value === model,
-        );
-        const isLocalProvider =
-          currentModel?.type === "local" || currentModel?.isLocal;
-        const isLocalMode = process.env.NEXT_PUBLIC_LOCAL_MODE === "true";
+        const currentModel = availableModels.find((m: any) => m.id === model);
 
-        const apiEndpoint =
-          isLocalProvider || isLocalMode
-            ? "/api/ask-ai-local"
-            : canUseCloudModels
-              ? "/api/ask-ai-cloud"
-              : getApiEndpoint("/api/ask-ai");
-        console.log(
-          "isLocalProvider: , apiEndpoint: ",
-          isLocalProvider,
-          apiEndpoint,
+        const apiEndpoint = getApiEndpointForModel(
+          selectedModel,
+          canUseCloudModels,
         );
+        // const apiEndpoint = isLocalProvider
+        //   ? "/api/ask-ai-local"
+        //   : canUseCloudModels
+        //     ? "/api/ask-ai-cloud"
+        //     : getApiEndpoint("/api/ask-ai");
+
         const messages = [
           {
             role: "system",
@@ -256,8 +234,8 @@ export function AskAI({
           const reader = request.body.getReader();
           const decoder = new TextDecoder("utf-8");
           const selectedModel =
-            availableModels.find((m: any) => m.value === model) ||
-            MODELS.find((m: { value: string }) => m.value === model);
+            availableModels.find((m: any) => m.id === model) ||
+            cloudModels.find((m: any) => m.id === model);
           let contentThink: string | undefined = undefined;
           const read = async () => {
             const { done, value } = await reader.read();
@@ -286,9 +264,7 @@ export function AskAI({
               setPrompt("");
               setisAiWorking(false);
               setHasAsked(true);
-              if (selectedModel?.isThinker) {
-                setModel(MODELS[0].value);
-              }
+
               if (audio.current) audio.current.play();
 
               // Now we have the complete HTML including </html>, so set it to be sure
@@ -359,6 +335,7 @@ export function AskAI({
         }
       }
     } catch (error: any) {
+      console.error(error.message);
       setisAiWorking(false);
       toast.error(error.message);
       if (error.openLogin) {
@@ -554,9 +531,6 @@ export function AskAI({
                 id="diff-patch-checkbox"
                 checked={isFollowUp}
                 onCheckedChange={(e) => {
-                  if (e === true && !isSameHtml && selectedModel?.isThinker) {
-                    setModel(MODELS[0].value);
-                  }
                   setIsFollowUp(e === true);
                 }}
               />

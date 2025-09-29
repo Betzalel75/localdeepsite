@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { MAX_REQUESTS_PER_IP } from "@/lib/prompts";
+import { readFileSync } from "fs";
 
 const ipAddresses = new Map();
 
@@ -24,6 +25,14 @@ const resetInterval = 60000;
 setInterval(() => {
   ipAddresses.clear();
 }, resetInterval);
+
+export function getSecret(name: string): string | null {
+  try {
+    return readFileSync(`/run/secrets/${name}`, "utf-8").trim();
+  } catch {
+    return null;
+  }
+}
 
 export async function POST(request: NextRequest) {
   const authHeaders = await headers();
@@ -255,7 +264,8 @@ async function callDeepSeekApi(
   messages: CloudMessage[],
   options: any,
 ): Promise<Response> {
-  const apiKey = process.env.DEEPSEEK_API_KEY;
+  const env = process.env.PRODUCTION;
+  const apiKey = env ? getSecret("deepseek_api_key") : process.env.DEEPSEEK_API_KEY;
   if (!apiKey) {
     throw new Error("DeepSeek API key not configured");
   }
@@ -281,7 +291,8 @@ async function callGoogleApi(
   messages: CloudMessage[],
   options: any,
 ): Promise<Response> {
-  const apiKey = process.env.GEMINI_API_KEY;
+  const env = process.env.PRODUCTION;
+  const apiKey = env ? getSecret("gemini_api_key") : process.env.GEMINI_API_KEY;
   if (!apiKey) {
     throw new Error("Google API key not configured");
   }
@@ -334,7 +345,8 @@ async function callOpenAIApi(
   messages: CloudMessage[],
   options: any,
 ): Promise<Response> {
-  const apiKey = process.env.OPENAI_API_KEY;
+  const env = process.env.PRODUCTION;
+  const apiKey = env ? getSecret("openai_api_key") : process.env.OPENAI_API_KEY;
   if (!apiKey) {
     throw new Error("OpenAI API key not configured");
   }
@@ -360,7 +372,8 @@ async function callAnthropicApi(
   messages: CloudMessage[],
   options: any,
 ): Promise<Response> {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
+  const env = process.env.PRODUCTION;
+  const apiKey = env ? getSecret("anthropic_api_key") : process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
     throw new Error("Anthropic API key not configured");
   }
@@ -393,7 +406,8 @@ async function callGroqApi(
   messages: CloudMessage[],
   options: any,
 ): Promise<Response> {
-  const apiKey = process.env.GROQ_API_KEY;
+  const env = process.env.PRODUCTION;
+  const apiKey = env ? getSecret("groq_api_key") : process.env.GROQ_API_KEY;
   if (!apiKey) {
     throw new Error("Groq API key not configured");
   }

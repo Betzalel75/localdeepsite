@@ -60,40 +60,40 @@ export const PROVIDERS = {
 };
 
 export const MODELS: ModelInterface[] = [
-  // Modèles locaux pour Ollama
-  {
-    value: "deepseek-r1:7b",
-    label: "DeepSeek R1 7B (Local)",
-    providers: ["ollama"],
-    autoProvider: "ollama",
-    isLocal: true,
-  },
-  {
-    value: "deepseek-r1:14b",
-    label: "DeepSeek R1 14B (Local)",
-    providers: ["ollama"],
-    autoProvider: "ollama",
-    isLocal: true,
-  },
-  {
-    value: "deepseek-r1:32b",
-    label: "DeepSeek R1 32B (Local)",
-    providers: ["ollama"],
-    autoProvider: "ollama",
-    isLocal: true,
-  },
-  {
-    value: "llama3.3:70b",
-    label: "Llama 3.3 70B (Local)",
-    providers: ["ollama", "lm-studio"],
-    autoProvider: "ollama",
-    isLocal: true,
-  },
-  {
-    value: "qwen2.5-coder:32b",
-    label: "Qwen2.5 Coder 32B (Local)",
-    providers: ["ollama", "lm-studio"],
-    autoProvider: "ollama",
-    isLocal: true,
-  },
+  // // Modèles locaux pour Ollama
+  // {
+  //   value: "deepseek-r1:7b",
+  //   label: "DeepSeek R1 7B (Local)",
+  //   providers: ["ollama"],
+  //   autoProvider: "ollama",
+  //   isLocal: true,
+  // },
+  // {
+  //   value: "deepseek-r1:14b",
+  //   label: "DeepSeek R1 14B (Local)",
+  //   providers: ["ollama"],
+  //   autoProvider: "ollama",
+  //   isLocal: true,
+  // },
+  // {
+  //   value: "deepseek-r1:32b",
+  //   label: "DeepSeek R1 32B (Local)",
+  //   providers: ["ollama"],
+  //   autoProvider: "ollama",
+  //   isLocal: true,
+  // },
+  // {
+  //   value: "llama3.3:70b",
+  //   label: "Llama 3.3 70B (Local)",
+  //   providers: ["ollama", "lm-studio"],
+  //   autoProvider: "ollama",
+  //   isLocal: true,
+  // },
+  // {
+  //   value: "qwen2.5-coder:32b",
+  //   label: "Qwen2.5 Coder 32B (Local)",
+  //   providers: ["ollama", "lm-studio"],
+  //   autoProvider: "ollama",
+  //   isLocal: true,
+  // },
 ];

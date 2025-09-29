@@ -2,6 +2,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
+import { getApiEndpoint, isLocalMode } from "./client-config";
+
 export interface ApiProvider {
   id: string;
   name: string;
@@ -118,6 +120,10 @@ class ApiManager {
   }
 
   private async initializeCloudProviders() {
+    // En mode local strict, on ne charge pas les providers cloud
+    if (this.isLocalModeEnabled() && !this.isMixedModeEnabled()) {
+      return;
+    }
     // Check which API keys are available
     const apiKeysResponse = await this.getAvailableApiKeys();
     // LA LIGNE MAGIQUE : on accède à la sous-propriété 'availableKeys'
@@ -171,21 +177,22 @@ class ApiManager {
         isAvailable: true,
         maxTokens: 1048576,
         supportedModels: [
-          "gemini-2.5-flash", // Corrigé: retiré le "pro"
+          "gemini-2.5-flash",
           "gemini-2.0-flash",
           "gemini-2.0-flash-lite",
         ],
       });
-    
+
       // Add Gemini models - CORRECTION ICI
       const geminiModels = [
         { id: "gemini-2.5-flash", name: "Gemini 2.5 Flash" }, // Corrigé
         { id: "gemini-2.0-flash-lite", name: "Gemini 2.0 Flash Lite" },
         { id: "gemini-2.0-flash", name: "Gemini 2.0 Flash" },
       ];
-    
+
       geminiModels.forEach((model) => {
-        this.models.set(`google-${model.id}`, { // Le préfixe "google-" est ajouté ici
+        this.models.set(`google-${model.id}`, {
+          // Le préfixe "google-" est ajouté ici
           id: `google-${model.id}`,
           name: model.name,
           provider: "google",
@@ -464,6 +471,22 @@ class ApiManager {
 
     return null;
   }
+}
+
+export function getApiEndpointForModel(
+  model: any,
+  canUseCloudModels: boolean,
+): string {
+  if (!model && !canUseCloudModels) {
+    console.warn(`Not model ${model}`);
+    return getApiEndpoint("/api/ask-ai");  // API HuggingFace par défaut si aucun modèle n'est sélectionné
+  }
+  console.log(model)
+  if (model.type === "local" || isLocalMode()) {
+    return "/api/ask-ai-local";
+  }
+
+  return "/api/ask-ai-cloud";
 }
 
 // Export singleton instance

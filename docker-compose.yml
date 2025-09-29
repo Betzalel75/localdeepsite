@@ -1,0 +1,25 @@
+version: "3.8"
+
+services:
+  web:
+    image: localsite-app
+    ports:
+      - "3000:3000"
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: localsite-web
+    environment:
+      - NEXT_PUBLIC_LOCAL_MODE=false
+      - ENABLE_MIXED_MODE=true
+      - OLLAMA_BASE_URL=${OLLAMA_BASE_URL}
+      - PRODUCTION=true
+    secrets:
+      - deepseek_api_key
+      - gemini_api_key
+
+secrets:
+  deepseek_api_key:
+    file: ./secrets/deepseek_api_key
+  gemini_api_key:
+    file: ./secrets/gemini_api_key

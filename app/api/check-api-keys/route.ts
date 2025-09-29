@@ -1,16 +1,38 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { readFileSync } from "fs";
 import { NextResponse } from "next/server";
+import { getSecret } from "../ask-ai-cloud/route";
 
 export async function GET() {
   try {
     // Check which API keys are available in environment variables
+    const production = process.env.PRODUCTION === "true";
+    const getSecrets = (name: string): string | null => {
+      try {
+        if (!production) {
+          // console.log(
+          //   "LOCAL DEVELOPMENT : reading directly from .env.local file",
+          // );
+          return process.env[name.toLocaleUpperCase()] || null;
+        } else {
+          // console.log("PRODUCTION ENVIRONEMENT : Reading from secret.");
+          return readFileSync(`/run/secrets/${name}`, "utf-8").trim();
+        }
+      } catch (error: any) {
+        console.warn(`Could not read secret ${name}: ${error.message}`);
+        return null;
+      }
+    };
+
+    // Check which API keys are available in environment variables
     const apiKeys: Record<string, string | null> = {
-      deepseek: process.env.DEEPSEEK_API_KEY || null,
-      google: process.env.GEMINI_API_KEY || null,
-      openai: process.env.OPENAI_API_KEY || null,
-      anthropic: process.env.ANTHROPIC_API_KEY || null,
-      groq: process.env.GROQ_API_KEY || null,
-      together: process.env.TOGETHER_API_KEY || null,
-      fireworks: process.env.FIREWORKS_API_KEY || null,
+      deepseek: getSecrets("deepseek_api_key"),
+      google: getSecrets("gemini_api_key"),
+      openai: getSecrets("openai_api_key"),
+      anthropic: getSecrets("anthropic_api_key"),
+      groq: getSecrets("groq_api_key"),
+      together: getSecrets("together_api_key"),
+      fireworks: getSecrets("fireworks_api_key"),
       huggingface: process.env.HF_TOKEN || null,
     };
 
@@ -52,11 +74,13 @@ export async function POST() {
     > = {};
 
     // DeepSeek validation
-    if (process.env.DEEPSEEK_API_KEY) {
+    const env = process.env.PRODUCTION;
+    const apiKey = env ? getSecret("deepseek_api_key") : process.env.DEEPSEEK_API_KEY;
+    if (apiKey) {
       try {
         const response = await fetch("https://api.deepseek.com/v1/models", {
           headers: {
-            Authorization: `Bearer ${process.env.DEEPSEEK_API_KEY}`,
+            Authorization: `Bearer ${apiKey}`,
             "Content-Type": "application/json",
           },
         });
@@ -73,10 +97,11 @@ export async function POST() {
     }
 
     // Google Gemini validation
-    if (process.env.GEMINI_API_KEY) {
+    const gapiKey = env ? getSecret("gemini_api_key") : process.env.GEMINI_API_KEY;
+    if (gapiKey) {
       try {
         const response = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models?key=${process.env.GEMINI_API_KEY}`,
+          `https://generativelanguage.googleapis.com/v1beta/models?key=${gapiKey}`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -96,11 +121,12 @@ export async function POST() {
     }
 
     // OpenAI validation
-    if (process.env.OPENAI_API_KEY) {
+    const oapiKey = env ? getSecret("openai_api_key") : process.env.OPENAI_API_KEY;
+    if (oapiKey) {
       try {
         const response = await fetch("https://api.openai.com/v1/models", {
           headers: {
-            Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+            Authorization: `Bearer ${oapiKey}`,
             "Content-Type": "application/json",
           },
         });
@@ -117,12 +143,13 @@ export async function POST() {
     }
 
     // Anthropic validation
-    if (process.env.ANTHROPIC_API_KEY) {
+    const clapiKey = env ? getSecret("anthropic_api_key") : process.env.ANTHROPIC_API_KEY;
+    if (clapiKey) {
       try {
         const response = await fetch("https://api.anthropic.com/v1/messages", {
           method: "POST",
           headers: {
-            "x-api-key": process.env.ANTHROPIC_API_KEY,
+            "x-api-key": clapiKey,
             "Content-Type": "application/json",
             "anthropic-version": "2023-06-01",
           },
@@ -148,11 +175,12 @@ export async function POST() {
     }
 
     // Groq validation
-    if (process.env.GROQ_API_KEY) {
+    const grkapiKey = env ? getSecret("groq_api_key") : process.env.GROQ_API_KEY;
+    if (grkapiKey) {
       try {
         const response = await fetch("https://api.groq.com/openai/v1/models", {
           headers: {
-            Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+            Authorization: `Bearer ${grkapiKey}`,
             "Content-Type": "application/json",
           },
         });
