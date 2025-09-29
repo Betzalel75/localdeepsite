@@ -60,45 +60,6 @@ export const PROVIDERS = {
 };
 
 export const MODELS: ModelInterface[] = [
-  {
-    value: "deepseek-ai/DeepSeek-V3-0324",
-    label: "DeepSeek V3 O324",
-    providers: ["fireworks-ai", "nebius", "sambanova", "novita", "hyperbolic"],
-    autoProvider: "novita",
-  },
-  {
-    value: "deepseek-ai/DeepSeek-R1-0528",
-    label: "DeepSeek R1 0528",
-    providers: [
-      "fireworks-ai",
-      "novita",
-      "hyperbolic",
-      "nebius",
-      "together",
-      "sambanova",
-    ],
-    autoProvider: "novita",
-    isThinker: true,
-  },
-  {
-    value: "Qwen/Qwen3-Coder-480B-A35B-Instruct",
-    label: "Qwen3 Coder 480B A35B Instruct",
-    providers: ["novita", "hyperbolic"],
-    autoProvider: "novita",
-  },
-  {
-    value: "moonshotai/Kimi-K2-Instruct",
-    label: "Kimi K2 Instruct",
-    providers: ["together", "novita", "groq"],
-    autoProvider: "groq",
-  },
-  {
-    value: "deepseek-ai/DeepSeek-V3.1",
-    label: "DeepSeek V3.1",
-    providers: ["fireworks-ai", "novita"],
-    isNew: true,
-    autoProvider: "novita",
-  },
   // Modèles locaux pour Ollama
   {
     value: "deepseek-r1:7b",

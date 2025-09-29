@@ -1,4 +1,5 @@
 // API Manager for handling different AI providers (local and cloud)
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 export interface ApiProvider {
@@ -79,46 +80,48 @@ class ApiManager {
     }
 
     // LM Studio provider
-    try {
-      const lmStudioUrl =
-        process.env.NEXT_PUBLIC_LM_STUDIO_BASE_URL || "http://localhost:1234";
-      const response = await fetch(`${lmStudioUrl}/v1/models`, {
-        headers: { "Content-Type": "application/json" },
-      });
+    // try {
+    //   const lmStudioUrl =
+    //     process.env.NEXT_PUBLIC_LM_STUDIO_BASE_URL || "http://localhost:1234";
+    //   const response = await fetch(`${lmStudioUrl}/v1/models`, {
+    //     headers: { "Content-Type": "application/json" },
+    //   });
 
-      if (response.ok) {
-        const data = await response.json();
+    //   if (response.ok) {
+    //     const data = await response.json();
 
-        this.providers.set("lm-studio", {
-          id: "lm-studio",
-          name: "LM Studio (Local)",
-          type: "local",
-          baseUrl: lmStudioUrl,
-          isAvailable: true,
-          maxTokens: 131000,
-          supportedModels: data.data?.map((m: { id: string }) => m.id) || [],
-        });
+    //     this.providers.set("lm-studio", {
+    //       id: "lm-studio",
+    //       name: "LM Studio (Local)",
+    //       type: "local",
+    //       baseUrl: lmStudioUrl,
+    //       isAvailable: true,
+    //       maxTokens: 131000,
+    //       supportedModels: data.data?.map((m: { id: string }) => m.id) || [],
+    //     });
 
-        // Add LM Studio models
-        data.data?.forEach((model: { id: string }) => {
-          this.models.set(model.id, {
-            id: model.id,
-            name: model.id.split("/").pop() || model.id,
-            provider: "lm-studio",
-            type: "local",
-            isAvailable: true,
-            isLocal: true,
-          });
-        });
-      }
-    } catch (error) {
-      console.warn("LM Studio not available:", error);
-    }
+    //     // Add LM Studio models
+    //     data.data?.forEach((model: { id: string }) => {
+    //       this.models.set(model.id, {
+    //         id: model.id,
+    //         name: model.id.split("/").pop() || model.id,
+    //         provider: "lm-studio",
+    //         type: "local",
+    //         isAvailable: true,
+    //         isLocal: true,
+    //       });
+    //     });
+    //   }
+    // } catch (error) {
+    //   console.warn("LM Studio not available:", error);
+    // }
   }
 
   private async initializeCloudProviders() {
     // Check which API keys are available
-    const apiKeys = await this.getAvailableApiKeys();
+    const apiKeysResponse = await this.getAvailableApiKeys();
+    // LA LIGNE MAGIQUE : on accède à la sous-propriété 'availableKeys'
+    const apiKeys = (apiKeysResponse as any)?.availableKeys || {};
 
     // DeepSeek provider
     if (apiKeys.deepseek) {
@@ -168,21 +171,21 @@ class ApiManager {
         isAvailable: true,
         maxTokens: 1048576,
         supportedModels: [
-          "gemini-1.5-pro",
-          "gemini-1.5-flash",
+          "gemini-2.5-flash", // Corrigé: retiré le "pro"
           "gemini-2.0-flash",
+          "gemini-2.0-flash-lite",
         ],
       });
-
-      // Add Gemini models
+    
+      // Add Gemini models - CORRECTION ICI
       const geminiModels = [
-        { id: "gemini-1.5-pro", name: "Gemini 1.5 Pro" },
-        { id: "gemini-1.5-flash", name: "Gemini 1.5 Flash" },
+        { id: "gemini-2.5-flash", name: "Gemini 2.5 Flash" }, // Corrigé
+        { id: "gemini-2.0-flash-lite", name: "Gemini 2.0 Flash Lite" },
         { id: "gemini-2.0-flash", name: "Gemini 2.0 Flash" },
       ];
-
+    
       geminiModels.forEach((model) => {
-        this.models.set(`google-${model.id}`, {
+        this.models.set(`google-${model.id}`, { // Le préfixe "google-" est ajouté ici
           id: `google-${model.id}`,
           name: model.name,
           provider: "google",

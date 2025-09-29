@@ -5,8 +5,6 @@ import { headers } from "next/headers";
 
 import {
   DIVIDER,
-  FOLLOW_UP_SYSTEM_PROMPT,
-  INITIAL_SYSTEM_PROMPT,
   MAX_REQUESTS_PER_IP,
   REPLACE_END,
   SEARCH_START,
@@ -47,9 +45,9 @@ async function callOllama(messages: any[], model: string, stream = true) {
 export async function POST(request: NextRequest) {
   const authHeaders = await headers();
   const body = await request.json();
-  const { prompt, provider, model, redesignMarkdown, html } = body;
+  const { provider, model, messages } = body;
 
-  if (!model || (!prompt && !redesignMarkdown)) {
+  if (!model || !messages) {
     return NextResponse.json(
       { ok: false, error: "Missing required fields" },
       { status: 400 }
@@ -95,21 +93,6 @@ export async function POST(request: NextRequest) {
     (async () => {
       let completeResponse = "";
       try {
-        const messages = [
-          {
-            role: "system",
-            content: INITIAL_SYSTEM_PROMPT,
-          },
-          {
-            role: "user",
-            content: redesignMarkdown
-              ? `Here is my current design as a markdown:\n\n${redesignMarkdown}\n\nNow, please create a new design based on this markdown.`
-              : html
-              ? `Here is my current HTML code:\n\n\`\`\`html\n${html}\n\`\`\`\n\nNow, please create a new design based on this HTML.`
-              : prompt,
-          },
-        ];
-
         // Utiliser Ollama par défaut en mode local
         if (provider === "ollama" || provider === "auto" || !provider) {
           const ollamaResponse = await callOllama(messages, model, true);
@@ -185,10 +168,10 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   const authHeaders = await headers();
   const body = await request.json();
-  const { prompt, html, previousPrompt, provider, selectedElementHtml, model } =
+  const { html, messages, provider, model } =
     body;
 
-  if (!prompt || !html) {
+  if (!html) {
     return NextResponse.json(
       { ok: false, error: "Missing required fields" },
       { status: 400 }
@@ -217,31 +200,6 @@ export async function PUT(request: NextRequest) {
   }
 
   try {
-    const messages = [
-      {
-        role: "system",
-        content: FOLLOW_UP_SYSTEM_PROMPT,
-      },
-      {
-        role: "user",
-        content: previousPrompt
-          ? previousPrompt
-          : "You are modifying the HTML file based on the user's request.",
-      },
-      {
-        role: "assistant",
-        content: `The current code is: \n\`\`\`html\n${html}\n\`\`\` ${
-          selectedElementHtml
-            ? `\n\nYou have to update ONLY the following element, NOTHING ELSE: \n\n\`\`\`html\n${selectedElementHtml}\n\`\`\``
-            : ""
-        }`,
-      },
-      {
-        role: "user",
-        content: prompt,
-      },
-    ];
-
     let chunk = "";
     
     if (provider === "ollama" || provider === "auto" || !provider) {

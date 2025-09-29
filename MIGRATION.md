@@ -53,7 +53,7 @@ NEXT_PUBLIC_ENABLE_MIXED_MODE=true
 
 # Ajoutez vos clés API (optionnel)
 DEEPSEEK_API_KEY=your_deepseek_api_key
-GOOGLE_API_KEY=your_google_api_key
+GEMINI_API_KEY=your_GEMINI_API_KEY
 OPENAI_API_KEY=your_openai_api_key
 ANTHROPIC_API_KEY=your_anthropic_api_key
 GROQ_API_KEY=your_groq_api_key
@@ -69,7 +69,7 @@ NEXT_PUBLIC_LOCAL_MODE=false
 
 # Ajoutez vos clés API
 DEEPSEEK_API_KEY=your_deepseek_api_key
-GOOGLE_API_KEY=your_google_api_key
+GEMINI_API_KEY=your_GEMINI_API_KEY
 # ... autres clés API
 ```
 
@@ -99,7 +99,7 @@ DEEPSEEK_API_KEY=sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 2. Créez une clé API
 3. Ajoutez dans `.env.local` :
 ```env
-GOOGLE_API_KEY=AIzaSyxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+GEMINI_API_KEY=AIzaSyxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
 ### OpenAI
@@ -209,7 +209,7 @@ OLLAMA_BASE_URL=http://localhost:11434
 
 # Cloud pour la performance
 DEEPSEEK_API_KEY=your_key
-GOOGLE_API_KEY=your_key
+GEMINI_API_KEY=your_key
 GROQ_API_KEY=your_key
 ```
 

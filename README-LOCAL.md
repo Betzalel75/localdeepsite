@@ -61,7 +61,7 @@ Ce projet permet d'utiliser à la fois des modèles IA locaux (Ollama, LM Studio
    
    # Ajoutez vos clés API
    DEEPSEEK_API_KEY=your_deepseek_api_key
-   GOOGLE_API_KEY=your_google_api_key
+   GEMINI_API_KEY=your_GEMINI_API_KEY
    OPENAI_API_KEY=your_openai_api_key
    # etc...
    ```
@@ -76,7 +76,7 @@ Ce projet permet d'utiliser à la fois des modèles IA locaux (Ollama, LM Studio
    
    # Clés API cloud (optionnelles)
    DEEPSEEK_API_KEY=your_deepseek_api_key
-   GOOGLE_API_KEY=your_google_api_key
+   GEMINI_API_KEY=your_GEMINI_API_KEY
    ```
 
 ## Utilisation
@@ -219,7 +219,7 @@ ollama pull nom-du-modele
 2. Générez une clé API
 3. Ajoutez dans `.env.local` :
    ```env
-   GOOGLE_API_KEY=your_api_key
+   GEMINI_API_KEY=your_api_key
    ```
 
 #### OpenAI

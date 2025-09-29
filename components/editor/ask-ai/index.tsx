@@ -28,6 +28,7 @@ import {
   getDefaultModel,
 } from "@/lib/client-config";
 import { useModelConfiguration } from "@/hooks/useApiManager";
+import { FOLLOW_UP_SYSTEM_PROMPT, INITIAL_SYSTEM_PROMPT } from "@/lib/prompts";
 
 export function AskAI({
   html,
@@ -94,7 +95,7 @@ export function AskAI({
     setThink("");
     setOpenThink(false);
     setIsThinking(true);
-
+    console.log("call AI");
     let contentResponse = "";
     let thinkResponse = "";
     let lastRenderTime = 0;
@@ -103,6 +104,7 @@ export function AskAI({
     setController(abortController);
     try {
       onNewPrompt(prompt);
+      let requestBody: any;
       if (isFollowUp && !redesignMarkdown && !isSameHtml) {
         const selectedElementHtml = selectedElement
           ? selectedElement.outerHTML
@@ -112,24 +114,60 @@ export function AskAI({
         const currentModel = availableModels.find(
           (m: any) => m.value === model,
         );
+
         const isLocalProvider =
           currentModel?.type === "local" || currentModel?.isLocal;
-        const apiEndpoint = isLocalProvider
-          ? "/api/ask-ai-local"
-          : canUseCloudModels
-            ? "/api/ask-ai-cloud"
-            : getApiEndpoint("/api/ask-ai");
+        const isLocalMode = process.env.NEXT_PUBLIC_LOCAL_MODE === "true";
+
+        const apiEndpoint =
+          isLocalProvider || isLocalMode
+            ? "/api/ask-ai-local"
+            : canUseCloudModels
+              ? "/api/ask-ai-cloud"
+              : getApiEndpoint("/api/ask-ai");
+        console.log(
+          "isLocalProvider: , apiEndpoint: ",
+          isLocalProvider,
+          apiEndpoint,
+        );
+        const messages = [
+          {
+            role: "system",
+            content: FOLLOW_UP_SYSTEM_PROMPT,
+          },
+          {
+            role: "user",
+            content: previousPrompt
+              ? previousPrompt
+              : "You are modifying the HTML file based on the user's request.",
+          },
+          {
+            role: "assistant",
+            content: `The current code is: \n\`\`\`html\n${html}\n\`\`\` ${
+              selectedElementHtml
+                ? `\n\nYou have to update ONLY the following element, NOTHING ELSE: \n\n\`\`\`html\n${selectedElementHtml}\n\`\`\``
+                : ""
+            }`,
+          },
+          {
+            role: "user",
+            content: prompt,
+          },
+        ];
+
+        requestBody = {
+          provider:
+            provider === "auto" ? currentModel?.isLocal || provider : provider,
+          model,
+          messages,
+          stream: !isFollowUp,
+          temperature: 0.7,
+          html,
+        };
 
         const request = await fetch(apiEndpoint, {
           method: "PUT",
-          body: JSON.stringify({
-            prompt,
-            provider,
-            previousPrompt,
-            model,
-            html,
-            selectedElementHtml,
-          }),
+          body: JSON.stringify(requestBody),
           headers: {
             "Content-Type": "application/json",
             "x-forwarded-for": window.location.hostname,
@@ -167,21 +205,47 @@ export function AskAI({
         );
         const isLocalProvider =
           currentModel?.type === "local" || currentModel?.isLocal;
-        const apiEndpoint = isLocalProvider
-          ? "/api/ask-ai-local"
-          : canUseCloudModels
-            ? "/api/ask-ai-cloud"
-            : getApiEndpoint("/api/ask-ai");
+        const isLocalMode = process.env.NEXT_PUBLIC_LOCAL_MODE === "true";
+
+        const apiEndpoint =
+          isLocalProvider || isLocalMode
+            ? "/api/ask-ai-local"
+            : canUseCloudModels
+              ? "/api/ask-ai-cloud"
+              : getApiEndpoint("/api/ask-ai");
+        console.log(
+          "isLocalProvider: , apiEndpoint: ",
+          isLocalProvider,
+          apiEndpoint,
+        );
+        const messages = [
+          {
+            role: "system",
+            content: INITIAL_SYSTEM_PROMPT,
+          },
+          {
+            role: "user",
+            content: redesignMarkdown
+              ? `Here is my current design as a markdown:\n\n${redesignMarkdown}\n\nNow, please create a new design based on this markdown.`
+              : html && !isSameHtml
+                ? `Here is my current HTML code:\n\n\`\`\`html\n${html}\n\`\`\`\n\nNow, please create a new design based on this HTML.`
+                : prompt,
+          },
+        ];
+
+        requestBody = {
+          provider:
+            provider === "auto" ? currentModel?.isLocal || provider : provider,
+          model,
+          messages,
+          stream: !isFollowUp,
+          temperature: 0.7,
+          html: isSameHtml ? "" : html,
+        };
 
         const request = await fetch(apiEndpoint, {
           method: "POST",
-          body: JSON.stringify({
-            prompt,
-            provider,
-            model,
-            html: isSameHtml ? "" : html,
-            redesignMarkdown,
-          }),
+          body: JSON.stringify(requestBody),
           headers: {
             "Content-Type": "application/json",
             "x-forwarded-for": window.location.hostname,

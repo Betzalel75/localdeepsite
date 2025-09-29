@@ -39,7 +39,7 @@ export const PROVIDER_CONFIGS: Record<string, ProviderConfig> = {
   google: {
     name: "Google Gemini",
     type: "cloud",
-    required: ["GOOGLE_API_KEY"],
+    required: ["GEMINI_API_KEY"],
     optional: [],
   },
   openai: {
@@ -204,7 +204,7 @@ export class ConfigValidator {
         DEEPSEEK_API_KEY: /^sk-[a-zA-Z0-9]{32,}$/,
         OPENAI_API_KEY: /^sk-[a-zA-Z0-9]{32,}$/,
         ANTHROPIC_API_KEY: /^sk-ant-[a-zA-Z0-9]{32,}$/,
-        GOOGLE_API_KEY: /^AIza[a-zA-Z0-9_-]{35,}$/,
+        GEMINI_API_KEY: /^AIza[a-zA-Z0-9_-]{35,}$/,
         GROQ_API_KEY: /^gsk_[a-zA-Z0-9]{32,}$/,
       };
 
