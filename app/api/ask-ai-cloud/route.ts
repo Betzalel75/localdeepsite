@@ -46,10 +46,6 @@ export async function POST(request: NextRequest) {
     temperature = 0.7,
   } = body;
 
-  console.log("🔍 API Cloud called with provider:", body.provider);
-  console.log("🔍 Referer:", request.headers.get("referer"));
-  console.log("🔍 User-Agent:", request.headers.get("user-agent"));
-
   if (!provider || !model || !messages) {
     return NextResponse.json(
       { ok: false, error: "Missing required **fields" },

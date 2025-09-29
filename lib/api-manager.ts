@@ -140,7 +140,7 @@ class ApiManager {
         isAvailable: true,
         maxTokens: 131000,
         supportedModels: [
-          "deepseek-chat",
+          "v3.1_terminus_expires_on_20251015",
           "deepseek-coder",
           "deepseek-reasoner",
         ],
@@ -148,7 +148,7 @@ class ApiManager {
 
       // Add DeepSeek models
       const deepSeekModels = [
-        { id: "deepseek-chat", name: "DeepSeek Chat" },
+        { id: "v3.1_terminus_expires_on_20251015", name: "DeepSeek Chat" },
         { id: "deepseek-coder", name: "DeepSeek Coder" },
         { id: "deepseek-reasoner", name: "DeepSeek Reasoner" },
       ];
