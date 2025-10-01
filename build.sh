@@ -6,7 +6,7 @@ echo $GEMINI_API_KEY > secrets/gemini_api_key
 
 # check if container is up
 if docker compose ps | grep -q "Up"; then
-    docker compose down
+    docker compose --env-file .env.local down
 fi
 
 docker compose --env-file .env.local up --build -d
